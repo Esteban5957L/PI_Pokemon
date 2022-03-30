@@ -45,6 +45,11 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    createdInDb:{
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+      allowNull: false
+    }
 
-  });
+  }, {timestamps: false});
 };
