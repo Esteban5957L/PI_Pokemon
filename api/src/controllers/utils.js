@@ -23,7 +23,7 @@ const getApiInfo = async () => {
                   height: poke.data.height,
                   weight: poke.data.weight,
                   types: poke.data.types.map(el => el.type),
-                  image: poke.data.sprites.front_default,
+                  img: poke.data.sprites.front_default,
                   createdInDb : false
               })
           })
@@ -59,7 +59,6 @@ const getPokesDbInfo = async () => {
 const getAllPokemons = async ()=>{
     const apiPokemonsInfo = await getApiInfo();
     const dbPokemonsInfo = await getPokesDbInfo();
-    //return apiPokemonsInfo.concat(dbPokemonsInfo);
     const infoTotal = [...apiPokemonsInfo,...dbPokemonsInfo];
     return infoTotal;
 }
