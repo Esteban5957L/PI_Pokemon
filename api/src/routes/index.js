@@ -30,46 +30,63 @@ router.get('/pokemons', async (req, res) => {
     }  
 });
 
-router.post('/pokemons', async (req, res) => {
+router.get("/types", async (req, res) => {
     try {
-        let {
-            name,
-            hp,
-            attack,
-            defense,
-            speed,
-            height,
-            weight,
-            image,
-            types,
-            createdInDb
-        } = req.body
-
-        let newPokemon = await Pokemon.create({
-            name,
-            hp,
-            attack,
-            defense,
-            speed,
-            height,
-            weight,
-            types,
-            image: image ? image : "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Pokebola-pokeball-png-0.png/769px-Pokebola-pokeball-png-0.png",
-            createdInDb
-        })
-
-        let typesDb = await Type.findAll({
-            where: {name: types}
+      const apiTypes = await axios.get("https://pokeapi.co/api/v2/type");
+      const types = apiTypes.data.results.map((e) => e.name);
+      types.map((ele) => {
+        Type.findOrCreate({
+          where: { name: ele },
         });
-
-        newPokemon.addType(typesDb); // metodo sequelize
-
-        res.status(200).send('¡Pokemon Created!');
-        } catch(e) {
-        console.log(e)
-    }  
+      });
+      const allTypes = await Type.findAll();
+      res.status(200).send(allTypes);
+    } catch (error) {
+        console.log('pepe')
+      console.log(error);
+    }
 });
 
+router.post('/pokemons', async (req, res)=>{
+    const {
+        id, 
+        name, 
+        hp,   
+        attack, 
+        defense, 
+        speed, 
+        weight, 
+        height,
+        types, 
+        img, 
+        createdInDb
+    } = req.body;
+    //res.send(img, name, types, id, hp, attack, defense, speed, weight, height, createdInDb)
+    try{
+        const newPokemon = await Pokemon.create({
+            id, 
+            name, 
+            hp,   
+            attack, 
+            defense, 
+            speed, 
+            weight, 
+            height, 
+            img, 
+            createdInDb
+        });
+    
+        const typeDb = await Type.findAll({
+            where: {name: types}
+        });
+        
+        await newPokemon.addType(typeDb);
+        res.send('newPokemon');
+    } catch (error){
+        res.send(error);
+    }
+    
+})
 router.get('/pokemons/:id', async (req, res) => {
     try {
     const id = req.params.id;
@@ -86,119 +103,4 @@ router.get('/pokemons/:id', async (req, res) => {
     }
 });
 
-
-/* router.get('/types', async (req, res) => {
-    try {
-    let typesApi = await axios.get('https://pokeapi.co/api/v2/type');
-    let types = typesApi.data.results.map(p => p.name);
-    //console.log('ALL TYPES: ', types);
-    types.forEach(t => {
-        Type.findOrCreate({
-            where: { name: t }
-        })
-    })
-    let allTypes = await Type.findAll();
-    res.status(200).send(allTypes);
-} catch(e) {
-    console.log(e)
-}  
-}); */
-router.get("/types", async (req, res) => {
-    try {
-      const apiTypes = await axios.get("https://pokeapi.co/api/v2/type");
-      const types = apiTypes.data.results.map((element) => element.name);
-      types.map((element) => {
-        Type.findOrCreate({
-          where: { name: element },
-        });
-      });
-      const allTypes = await Type.findAll();
-      res.status(200).send(allTypes);
-    } catch (error) {
-        console.log('pepe')
-      console.log(error);
-    }
-});
-
-
-
-
 module.exports = router;
-
-// GET /pokemons:
-/* router.get('/pokemons', async (req, res) =>{
-    const name = req.query.name;
-    let pokeTotals = await getAllPokemons();
-    if(name){
-        let pokeName = await pokeTotals.filter( el => el.name.toLowerCase() === name.toLowerCase())
-        pokeName.length ? 
-        res.status(200).send(pokeName) : 
-        res.status(404).send('No esta el personaje')
-    }else{
-        res.status(200).send(pokeTotals)
-    }
-})
-
-router.get("/types", async (req, res) => {
-    try {
-      const apiTypes = await axios.get("https://pokeapi.co/api/v2/type");
-      const types = apiTypes.data.results.map((element) => element.name);
-      types.map((element) => {
-        Type.findOrCreate({
-          where: { name: element },
-        });
-      });
-      const allTypes = await Type.findAll();
-      res.status(200).send(allTypes);
-    } catch (error) {
-      console.log(error);
-    }
-});
-
-router.post('/pokemons', async(req, res) => {
-    try {
-        const {id,img,name,hp,attack,defense,speed,height,weight,types} = req.body
-        const pokemonCreate = await Pokemon.create({
-            id,
-            img: img ? img : "https://cdn.alfabetajuega.com/alfabetajuega/2020/02/egg.png?width=800",
-            name,
-            hp,
-            attack,
-            defense,
-            speed,
-            height,
-            weight,
-            types, 
-        })
-
-        let typesDb = await Type.findAll({
-            where: {name: types}
-        });
-
-        pokemonCreate.addType(typesDb); // metodo sequelize
-        res.status(200).send('¡Pokemon Created!');
-    } catch (error) {
-        console.log(error);
-      }
-    
-});
-
-
-//GET /pokemons/{idPokemon}:
-router.get('/pokemons/:idPokemon', async(req, res) => {
-    try {
-        const {id} = req.params;
-        const TotalPoket = await getAllPokemons();
-        if(id){
-            const pokemonId = TotalPoket.filter(poke => poke.id == id);
-            pokemonId.length?
-            res.status(200).json(pokemonId) :
-            res.status(404).send('Pokemon not found')
-            }
-    } catch (error) {
-        console.log(error);
-      }
-});
-
-module.exports = router; */
-
